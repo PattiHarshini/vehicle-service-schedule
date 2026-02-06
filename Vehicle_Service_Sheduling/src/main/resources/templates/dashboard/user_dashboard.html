@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>User Dashboard - Vehicle Service Scheduling</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc !important;
+            color: #1e293b !important;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+        }
+        .navbar .navbar-brand, .navbar .nav-link, .navbar .bi {
+            color: #fff !important;
+        }
+        .card {
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+        .table thead {
+            background-color: #2563eb;
+            color: #fff;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e0e7ff;
+        }
+        .modal-content {
+            border-radius: 16px;
+        }
+        .alert {
+            border-radius: 8px;
+        }
+        .btn-sm {
+            margin: 2px;
+        }
+        .status-badge {
+            padding: 0.35em 0.75em;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-transform: capitalize;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#"><i class="bi bi-person-circle me-2"></i>Vehicle Service User</a>
+    </div>
+</nav>
+<div class="container">
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <!-- Main Content (preserve all Thymeleaf logic) -->
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h4 class="card-title mb-4">Welcome, <span th:text="${user.username}">User</span>!</h4>
+            <div class="d-grid gap-3 col-6 mx-auto">
+                <a class="btn btn-primary btn-lg" th:href="@{/booking/new}"><i class="bi bi-calendar-plus me-2"></i>Book a Service</a>
+                <div class="btn-group-vertical w-100">
+                    <a class="btn btn-success btn-lg mb-2" th:href="@{/booking/list}"><i class="bi bi-list-check me-2"></i>My Bookings</a>
+                    <a class="btn btn-outline-success btn-sm" th:href="@{/booking/history}"><i class="bi bi-clock-history me-2"></i>Booking History</a>
+                </div>
+                <div class="btn-group-vertical w-100">
+                    <a class="btn btn-info btn-lg mb-2" th:href="@{/profile}"><i class="bi bi-person-lines-fill me-2"></i>Profile</a>
+                    <a class="btn btn-outline-info btn-sm" th:href="@{/profile/update}"><i class="bi bi-pencil-square me-2"></i>Update Profile</a>
+                </div>
+                <form th:action="@{/logout}" method="post" class="d-grid">
+                    <button type="submit" class="btn btn-danger btn-lg"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white rounded-top">
+            <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Recent Bookings</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${bookings == null or #lists.isEmpty(bookings)}">
+                <p class="text-muted">No active bookings found.</p>
+            </div>
+            <div th:unless="${bookings == null or #lists.isEmpty(bookings)}">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Service</th>
+                            <th>Vehicle</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="booking : ${bookings}">
+                            <td th:text="${booking.id}"></td>
+                            <td th:text="${booking.serviceType != null ? booking.serviceType.name : 'N/A'}"></td>
+                            <td th:text="${booking.vehicleBrand != null ? booking.vehicleBrand + ' ' + booking.vehicleModel : 'N/A'}"></td>
+                            <td th:text="${#temporals.format(booking.bookingDate, 'dd-MMM-yyyy HH:mm')}"></td>
+                            <td>
+                                <span th:class="${'status-badge status-' + booking.status.name().toLowerCase()}"
+                                      th:text="${booking.status}"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Vehicles Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white rounded-top">
+            <h5 class="mb-0"><i class="bi bi-car-front me-2"></i>My Vehicles</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${vehicles == null or #lists.isEmpty(vehicles)}">
+                <p class="text-muted">No vehicles found. <a href="/vehicles/add">Add a vehicle</a></p>
+            </div>
+            <div th:unless="${vehicles == null or #lists.isEmpty(vehicles)}">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead>
+                        <tr>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Registration Number</th>
+                            <th>Fuel Type</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="vehicle : ${vehicles}">
+                            <td th:text="${vehicle.brand}"></td>
+                            <td th:text="${vehicle.model}"></td>
+                            <td th:text="${vehicle.licensePlate}"></td>
+                            <td th:text="${vehicle.fuelType}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

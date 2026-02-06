@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; }
+        .card { border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+        .profile-label { font-weight: 500; }
+        .btn-primary { background-color: #2563eb; border: none; }
+        .btn-secondary { background-color: #64748b; border: none; }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4">
+                <h2 class="mb-4 text-center"><i class="bi bi-person-circle me-2"></i>Profile</h2>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                <dl class="row mb-4">
+                    <dt class="col-sm-4 profile-label">Username:</dt>
+                    <dd class="col-sm-8" th:text="${user.username}">username</dd>
+                    <dt class="col-sm-4 profile-label">Email:</dt>
+                    <dd class="col-sm-8" th:text="${user.email}">email@example.com</dd>
+                    <dt class="col-sm-4 profile-label">Role:</dt>
+                    <dd class="col-sm-8" th:text="${user.role}">USER</dd>
+                    <dt class="col-sm-4 profile-label">Phone:</dt>
+                    <dd class="col-sm-8" th:text="${user.phone}">N/A</dd>
+                    <dt class="col-sm-4 profile-label">Address:</dt>
+                    <dd class="col-sm-8" th:text="${user.address}">N/A</dd>
+                </dl>
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/profile/update}" class="btn btn-primary"><i class="bi bi-pencil"></i> Edit Profile</a>
+                    <a th:href="@{/dashboard/user}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

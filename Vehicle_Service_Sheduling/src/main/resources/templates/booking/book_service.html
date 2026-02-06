@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book Service</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; }
+        .card { border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+        .form-label { font-weight: 500; }
+        .btn-primary { background-color: #2563eb; border: none; }
+        .btn-secondary { background-color: #64748b; border: none; }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4">
+                <h2 class="mb-4 text-center"><i class="bi bi-calendar-plus me-2"></i>Book a Service</h2>
+                <form th:action="@{/booking/new}" method="post" th:object="${bookingRequest}">
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span th:text="${errorMessage}">Error message</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <span th:text="${successMessage}">Success message</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+                    <!-- Vehicle Brand -->
+                    <div class="mb-3">
+                        <label for="vehicleBrand" class="form-label">Vehicle Brand</label>
+                        <select id="vehicleBrand" th:field="*{vehicleBrand}" class="form-select" required>
+                            <option value="">-- Select Brand --</option>
+                            <option th:each="brand : ${vehicleBrands}" 
+                                    th:value="${brand.name}" 
+                                    th:text="${brand.name}"
+                                    th:data-id="${brand.id}"></option>
+                        </select>
+                    </div>
+                    <!-- Vehicle Model -->
+                    <div class="mb-3">
+                        <label for="vehicleModel" class="form-label">Vehicle Model</label>
+                        <select id="vehicleModel" th:field="*{vehicleModel}" class="form-select" required>
+                            <option value="">-- Select Brand First --</option>
+                        </select>
+                    </div>
+                    <!-- Vehicle Number -->
+                    <div class="mb-3">
+                        <label for="vehicleRegistrationNumber" class="form-label">Vehicle Number</label>
+                        <input type="text" id="vehicleRegistrationNumber" th:field="*{vehicleRegistrationNumber}" class="form-control" required>
+                    </div>
+
+                    <!-- Service Type Selection -->
+                    <div class="mb-3">
+                        <label for="serviceTypeId" class="form-label">Service Type</label>
+                        <select id="serviceTypeId" th:field="*{serviceTypeId}" class="form-select" required>
+                            <option value="">-- Select a Service --</option>
+                            <th:block th:each="service : ${serviceTypes}">
+                                <option th:value="${service.id}"
+                                        th:text="${service.name + ' - Rs ' + service.price}"
+                                        th:disabled="${!service.available}"
+                                        th:style="${!service.available ? 'color: #dc3545;' : ''}">
+                                </option>
+                            </th:block>
+                        </select>
+                        <small th:if="${#lists.isEmpty(serviceTypes) or #lists.size(serviceTypes) == #lists.size(serviceTypes.?[!available])}" class="form-text text-danger">
+                            No services are currently available.
+                        </small>
+                    </div>
+
+                    <!-- Booking Date -->
+                    <div class="mb-3">
+                        <label for="bookingDate" class="form-label">Booking Date & Time</label>
+                        <input type="datetime-local" id="bookingDate" th:field="*{bookingDate}" class="form-control" required>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea id="notes" th:field="*{notes}" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-2"></i>Book Now</button>
+                        <a th:href="@{/dashboard/user}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const brandSelect = document.getElementById('vehicleBrand');
+    const modelSelect = document.getElementById('vehicleModel');
+
+    brandSelect.addEventListener('change', function() {
+        const selectedBrand = this.value;
+        modelSelect.innerHTML = '<option value="">Loading...</option>';
+
+        if (selectedBrand) {
+            // Find the brand ID from the selected option
+            const selectedOption = this.options[this.selectedIndex];
+            const brandId = selectedOption.getAttribute('data-id');
+            
+            if (brandId) {
+                fetch(`/booking/api/models?brandId=${brandId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+                        data.forEach(model => {
+                            const option = document.createElement('option');
+                            option.value = model.name;
+                            option.textContent = model.name;
+                            modelSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching models:', error);
+                        modelSelect.innerHTML = '<option value="">Failed to load models</option>';
+                    });
+            } else {
+                modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+            }
+        } else {
+            modelSelect.innerHTML = '<option value="">-- Select Brand First --</option>';
+        }
+    });
+});
+</script>
+</body>
+</html>

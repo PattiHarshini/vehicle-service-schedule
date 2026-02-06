@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Service</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; }
+        .card { border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+        .form-label { font-weight: 500; }
+        .btn-success { background-color: #2563eb; border: none; }
+        .btn-secondary { background-color: #64748b; border: none; }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4">
+                <h2 class="mb-4 text-center"><i class="bi bi-plus-circle me-2"></i>Add New Service</h2>
+                <form th:action="@{/services/save}" method="post" th:object="${service}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Service Name</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" th:field="*{description}" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price (₹)</label>
+                        <input type="number" id="price" th:field="*{price}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Duration</label>
+                        <input type="text" id="duration" th:field="*{duration}" class="form-control" required>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">Add Service</button>
+                        <a th:href="@{/services}" class="btn btn-secondary">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
